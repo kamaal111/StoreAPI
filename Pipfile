@@ -8,6 +8,7 @@ returns = "*"
 requests = "*"
 pyjwt = "*"
 python-dotenv = "*"
+cryptography = "*"
 
 [dev-packages]
 black = "*"
