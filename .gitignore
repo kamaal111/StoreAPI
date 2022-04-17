@@ -1,2 +1,3 @@
 store_key.p8
 .ssh
+.env

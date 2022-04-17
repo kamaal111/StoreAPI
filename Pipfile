@@ -7,9 +7,13 @@ name = "pypi"
 returns = "*"
 requests = "*"
 pyjwt = "*"
-ipython = "*"
+python-dotenv = "*"
 
 [dev-packages]
+black = "*"
 
 [requires]
 python_version = "3.10"
+
+[pipenv]
+allow_prereleases = true
