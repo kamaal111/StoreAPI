@@ -22,7 +22,7 @@ def make_jwt_token(*, env: "Env"):
     now = time.time()
     issued_at = int(now)
     minute = 60
-    expiration_date = int(now + (minute * 50))
+    expiration_date = issued_at + (minute * 50)
     payload_data = {
         "iss": env["issuer_id"],
         "iat": issued_at,
