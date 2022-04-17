@@ -1,6 +1,8 @@
 from os import environ
+from typing import TYPE_CHECKING
 
-from ..typing import Env
+if TYPE_CHECKING:
+    from ..typing import Env
 
 
 def get_env() -> "Env":

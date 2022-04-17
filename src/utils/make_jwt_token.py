@@ -1,12 +1,23 @@
 import jwt
 import time
+from typing import TYPE_CHECKING
 
-from ..typing import Env
+
+if TYPE_CHECKING:
+    from ..typing import Env
+    from typing import Optional
+
+__private_key: "Optional[str]" = None
 
 
 def make_jwt_token(*, env: "Env"):
-    with open("store_key.p8", "r") as store_key:
-        private_key = store_key.read()
+    global __private_key
+    if __private_key:
+        private_key = __private_key
+    else:
+        with open("store_key.p8", "r") as store_key:
+            __private_key = store_key.read()
+            private_key = __private_key
 
     now = time.time()
     issued_at = int(now)
