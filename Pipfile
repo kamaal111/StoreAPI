@@ -9,6 +9,8 @@ requests = "*"
 pyjwt = "*"
 python-dotenv = "*"
 cryptography = "*"
+fastapi = "*"
+uvicorn = {extras = ["standard"], version = "*"}
 
 [dev-packages]
 black = "*"
