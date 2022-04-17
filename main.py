@@ -25,7 +25,7 @@ def main():
     now = time.time()
     issued_at = int(now)
     minute = 60
-    expiration_date = now + (minute * 50)
+    expiration_date = int(now + (minute * 50))
     payload_data = {
         "iss": issuer_id,
         "iat": issued_at,
