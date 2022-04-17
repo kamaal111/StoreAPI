@@ -2,7 +2,6 @@ import jwt
 import time
 from os import environ
 from dotenv import load_dotenv
-from cryptography.hazmat.primitives import serialization
 
 
 load_dotenv()
@@ -19,8 +18,8 @@ def main():
     if not app_id:
         raise Exception("no app id provided")
 
-    with open(".ssh/id_rsa", "r") as id_rsa:
-        private_key = id_rsa.read()
+    with open("store_key.p8", "r") as store_key:
+        private_key = store_key.read()
 
     now = time.time()
     issued_at = int(now)
@@ -33,9 +32,10 @@ def main():
         "aud": "appstoreconnect-v1",
         "bid": app_id,
     }
-    key = serialization.load_ssh_private_key(private_key.encode(), password=b"")
-    jwt_payload = jwt.encode(payload=payload_data, key=key, algorithm="RS256")  # type: ignore
-
+    headers = {"alg": "ES256", "kid": key_id, "typ": "JWT"}
+    jwt_payload = jwt.encode(
+        payload=payload_data, key=private_key, algorithm="RS256", headers=headers
+    )
     print(jwt_payload)
 
 
