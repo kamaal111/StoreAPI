@@ -31,5 +31,6 @@ def read_transactions(transactions_id: str):
             response: "Response" = error.response
             raise HTTPException(status_code=response.status_code, detail="noooo!")
         case Success(data):
-            data.pop("signedTransactions", None)
+            signed_transactions = data.pop("signedTransactions", None)
+            print(f"{signed_transactions}")
             return {"status": data}
