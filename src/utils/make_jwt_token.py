@@ -30,7 +30,7 @@ def make_jwt_token(*, env: "Env"):
         "aud": "appstoreconnect-v1",
         "bid": env["app_id"],
     }
-    headers = {"alg": "ES256", "kid": env["app_id"], "typ": "JWT"}
+    headers = {"alg": "ES256", "kid": env["key_id"], "typ": "JWT"}
     jwt_payload = jwt.encode(
         payload=payload_data, key=private_key, algorithm="RS256", headers=headers
     )
