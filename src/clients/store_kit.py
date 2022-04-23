@@ -8,7 +8,7 @@ from ..utils.make_jwt_token import make_jwt_token
 if TYPE_CHECKING:
     from returns.result import Result
 
-    from ..typing import Env
+    from ..typing import Env, Transaction
 
 
 _BASE_URL = "https://api.storekit-sandbox.itunes.apple.com/"
@@ -29,7 +29,7 @@ class StoreKit:
 
     def get_transaction_history(
         self, *, original_transaction_id: str
-    ) -> "Result[requests.Response, requests.HTTPError]":
+    ) -> "Result[Transaction, requests.HTTPError]":
         url = urljoin(_BASE_URL, f"inApps/v1/history/{original_transaction_id}")
         response = requests.get(url=url, headers=self.headers)
 
@@ -38,4 +38,5 @@ class StoreKit:
         except requests.HTTPError as error:
             return Failure(error)
 
-        return Success(response)
+        json_response: "Transaction" = response.json()
+        return Success(json_response)
