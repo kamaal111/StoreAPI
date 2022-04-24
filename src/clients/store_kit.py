@@ -9,10 +9,10 @@ from ..utils.jwt_helper import JWTHelper
 from ..decorators.preview_result import preview_result
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import List
     from returns.result import Result
 
-    from ..typing import Env, TransactionHistory
+    from ..typing import Env, TransactionHistory, JWSTransaction
 
 
 _BASE_URL = "https://api.storekit-sandbox.itunes.apple.com/"
@@ -47,10 +47,14 @@ class StoreKit:
             case _:
                 return Failure(Exception("something weird happend"))
 
+        decoded_signed_transactions: "List[JWSTransaction]" = []
         for signed_transaction in json_response["signedTransactions"]:
-            decoded_transaction = self.jwt_helper.decode_token(
+            decoded_signed_transaction = self.jwt_helper.decode_jws(
                 payload=signed_transaction
             )
+            decoded_signed_transactions.append(decoded_signed_transaction)
+
+        print(decoded_signed_transactions)
 
         return Success(json_response)
 

@@ -1,12 +1,12 @@
 import base64
-import binascii
+import json
 import jwt
 import time
 from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
-    from ..typing import Env
+    from ..typing import Env, JWSTransaction
 
 
 class JWTHelper:
@@ -34,16 +34,11 @@ class JWTHelper:
 
         return jwt_payload
 
-    def decode_token(self, *, payload: str):
-        for segment in payload.split("."):
-            extra = (b"=" * (-len(segment) % 4)).decode()
-            try:
-                decoded_segment = base64.b64decode(segment + extra)
-                print(decoded_segment)
-            except binascii.Error as error:
-                print(f"{error=}")
-
-        return ""
+    def decode_jws(self, *, payload: str) -> "JWSTransaction":
+        segment = payload.split(".")[1]
+        extra = (b"=" * (-len(segment) % 4)).decode()
+        decoded_segment = base64.b64decode(f"{segment}{extra}")
+        return json.loads(decoded_segment)
 
     @staticmethod
     def _get_private_key():
