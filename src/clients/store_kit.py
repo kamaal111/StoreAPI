@@ -18,6 +18,12 @@ if TYPE_CHECKING:
 _BASE_URL = "https://api.storekit-sandbox.itunes.apple.com/"
 
 
+class StoreKitException(Exception):
+    def __init__(self, *, message: str, status_code: int) -> None:
+        self.message = message
+        self.status_code = status_code
+
+
 class StoreKit:
     env: "Env"
 
@@ -35,17 +41,27 @@ class StoreKit:
 
     def get_transaction_history(
         self, *, original_transaction_id: str, preview: bool = False
-    ) -> "Result[TransactionHistory, Exception]":
+    ) -> "Result[TransactionHistory, StoreKitException]":
         response_result = self._get_transaction_history_response(
             original_transaction_id=original_transaction_id, preview=preview
         )
         match response_result:
             case Failure(error):
-                return Failure(error)
+                error_response: "requests.Response" = error.response
+                return Failure(
+                    StoreKitException(
+                        message=error_response.reason,
+                        status_code=error_response.status_code,
+                    )
+                )
             case Success(response):
                 json_response = response
             case _:
-                return Failure(Exception("something weird happened"))
+                return Failure(
+                    StoreKitException(
+                        message="something weird happened", status_code=500
+                    )
+                )
 
         decoded_signed_transactions: "List[JWSTransaction]" = []
         for signed_transaction in json_response["signedTransactions"]:
