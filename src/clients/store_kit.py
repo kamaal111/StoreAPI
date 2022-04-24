@@ -54,7 +54,7 @@ class StoreKit:
             )
             decoded_signed_transactions.append(decoded_signed_transaction)
 
-        print(decoded_signed_transactions)
+        json_response["transactions"] = decoded_signed_transactions
 
         return Success(json_response)
 

@@ -1,4 +1,4 @@
-from typing import List, Literal, TypedDict
+from typing import List, Literal, Optional, TypedDict
 
 
 class Env(TypedDict):
@@ -16,6 +16,7 @@ class TransactionHistory(TypedDict):
     environment: Environment
     hasMore: bool
     signedTransactions: List[str]
+    transactions: Optional[List["JWSTransaction"]]
 
 
 JWSTransaction = TypedDict(
