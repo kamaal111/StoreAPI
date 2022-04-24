@@ -16,8 +16,8 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/transactions/{transactions_id}")
-def read_transactions(transactions_id: str):
+@app.get("/transaction-history/{transactions_id}")
+def read_transaction_history(transactions_id: str):
     env = get_env()
     store_kit = StoreKit(env=env)
     result = store_kit.get_transaction_history(original_transaction_id=transactions_id)
