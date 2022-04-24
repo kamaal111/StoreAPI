@@ -1,11 +1,13 @@
-import json
-from jwt import InvalidSignatureError
 import requests
+from jwt import InvalidSignatureError
 from typing import TYPE_CHECKING
 from urllib.parse import urljoin
 from returns.result import Success, Failure
 
+
 from ..utils.jwt_helper import JWTHelper
+
+from ..decorators.preview_result import preview_result
 
 if TYPE_CHECKING:
     from returns.result import Result
@@ -31,23 +33,19 @@ class StoreKit:
             "Authorization": f"Bearer {jwt_token}",
         }
 
+    @preview_result("response.json")
     def get_transaction_history(
         self, *, original_transaction_id: str, preview: bool = False
     ) -> "Result[TransactionHistory, requests.HTTPError]":
-        json_response: "TransactionHistory"
-        if preview:
-            with open("response.json", "r") as response:
-                json_response = json.loads(response.read())
-        else:
-            url = urljoin(_BASE_URL, f"inApps/v1/history/{original_transaction_id}")
-            response = requests.get(url=url, headers=self.headers)
+        url = urljoin(_BASE_URL, f"inApps/v1/history/{original_transaction_id}")
+        response = requests.get(url=url, headers=self.headers)
 
-            try:
-                response.raise_for_status()
-            except requests.HTTPError as error:
-                return Failure(error)
+        try:
+            response.raise_for_status()
+        except requests.HTTPError as error:
+            return Failure(error)
 
-            json_response: "TransactionHistory" = response.json()
+        json_response: "TransactionHistory" = response.json()
 
         for signed_transaction in json_response["signedTransactions"]:
             try:
