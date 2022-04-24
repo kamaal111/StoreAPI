@@ -23,7 +23,9 @@ def read_transaction_history(transactions_id: str):
     result = store_kit.get_transaction_history(original_transaction_id=transactions_id)
     match result:
         case Failure(error):
-            raise HTTPException(status_code=error.status_code, detail=error.message)
+            raise HTTPException(
+                status_code=error.status_code, detail=error.message
+            ) from error
         case Success(data):
             _ = data.pop("signedTransactions", None)
             return data
