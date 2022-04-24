@@ -1,5 +1,2 @@
 store_key.p8
-.ssh
 .env
-store_key_public.pem
-store_key_copy.p8
