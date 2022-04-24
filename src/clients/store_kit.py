@@ -45,7 +45,7 @@ class StoreKit:
             case Success(response):
                 json_response = response
             case _:
-                return Failure(Exception("something weird happend"))
+                return Failure(Exception("something weird happened"))
 
         decoded_signed_transactions: "List[JWSTransaction]" = []
         for signed_transaction in json_response["signedTransactions"]:
