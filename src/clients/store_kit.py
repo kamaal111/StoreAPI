@@ -1,5 +1,6 @@
 import requests
 from typing import TYPE_CHECKING
+from http.client import INTERNAL_SERVER_ERROR
 from urllib.parse import urljoin
 from returns.result import Success, Failure
 
@@ -59,7 +60,8 @@ class StoreKit:
             case _:
                 return Failure(
                     StoreKitException(
-                        message="something weird happened", status_code=500
+                        message="something weird happened",
+                        status_code=INTERNAL_SERVER_ERROR,
                     )
                 )
 
