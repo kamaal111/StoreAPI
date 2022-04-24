@@ -1,3 +1,5 @@
+import base64
+import binascii
 import jwt
 import time
 from typing import TYPE_CHECKING
@@ -33,16 +35,17 @@ class JWTHelper:
         return jwt_payload
 
     def decode_token(self, *, payload: str):
-        public_key = JWTHelper._get_public_key()
+        for segment in payload.split("."):
+            extra = (b"=" * (-len(segment) % 4)).decode()
+            try:
+                decoded_segment = base64.b64decode(segment + extra)
+                print(decoded_segment)
+            except binascii.Error as error:
+                print(f"{error=}")
 
-        return jwt.decode(jwt=payload, key=public_key, algorithms=[self.ALGORITHM])
+        return ""
 
     @staticmethod
     def _get_private_key():
         with open("store_key.p8", "r") as private_key:
             return private_key.read()
-
-    @staticmethod
-    def _get_public_key():
-        with open("store_key_public.pem", "r") as public_key:
-            return public_key.read()

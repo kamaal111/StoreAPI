@@ -1,5 +1,4 @@
 import requests
-from jwt import InvalidSignatureError
 from typing import TYPE_CHECKING
 from urllib.parse import urljoin
 from returns.result import Success, Failure
@@ -10,6 +9,7 @@ from ..utils.jwt_helper import JWTHelper
 from ..decorators.preview_result import preview_result
 
 if TYPE_CHECKING:
+    from typing import Optional
     from returns.result import Result
 
     from ..typing import Env, TransactionHistory
@@ -33,9 +33,30 @@ class StoreKit:
             "Authorization": f"Bearer {jwt_token}",
         }
 
-    @preview_result("response.json")
     def get_transaction_history(
         self, *, original_transaction_id: str, preview: bool = False
+    ) -> "Result[TransactionHistory, Exception]":
+        response_result = self._get_transaction_history_response(
+            original_transaction_id=original_transaction_id, preview=preview
+        )
+        match response_result:
+            case Failure(error):
+                return Failure(error)
+            case Success(response):
+                json_response = response
+            case _:
+                return Failure(Exception("something weird happend"))
+
+        for signed_transaction in json_response["signedTransactions"]:
+            decoded_transaction = self.jwt_helper.decode_token(
+                payload=signed_transaction
+            )
+
+        return Success(json_response)
+
+    @preview_result("response.json")
+    def _get_transaction_history_response(
+        self, *, original_transaction_id: str, preview: bool
     ) -> "Result[TransactionHistory, requests.HTTPError]":
         url = urljoin(_BASE_URL, f"inApps/v1/history/{original_transaction_id}")
         response = requests.get(url=url, headers=self.headers)
@@ -46,14 +67,4 @@ class StoreKit:
             return Failure(error)
 
         json_response: "TransactionHistory" = response.json()
-
-        for signed_transaction in json_response["signedTransactions"]:
-            try:
-                decoded_transaction = self.jwt_helper.decode_token(
-                    payload=signed_transaction
-                )
-                print(f"{decoded_transaction=}")
-            except InvalidSignatureError as error:
-                print(f"{error=}")
-
         return Success(json_response)

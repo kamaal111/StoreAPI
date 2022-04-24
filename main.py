@@ -1,13 +1,9 @@
-from typing import TYPE_CHECKING
 from fastapi import FastAPI, HTTPException
 from dotenv import load_dotenv
 from returns.result import Success, Failure
 
 from src.clients.store_kit import StoreKit
 from src.utils.get_env import get_env
-
-if TYPE_CHECKING:
-    from requests import Response
 
 
 load_dotenv()
@@ -30,8 +26,7 @@ def read_transactions(transactions_id: str):
     match result:
         case Failure(error):
             print("failure", error)
-            response: "Response" = error.response
-            raise HTTPException(status_code=response.status_code, detail="noooo!")
+            raise HTTPException(status_code=500, detail="noooo!")
         case Success(data):
             _ = data.pop("signedTransactions", None)
             # print(f"{signed_transactions}")
