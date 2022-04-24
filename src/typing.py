@@ -7,7 +7,7 @@ class Env(TypedDict):
     app_id: str
 
 
-class Transaction(TypedDict):
+class TransactionHistory(TypedDict):
     revision: str
     bundleId: str
     environment: Literal["Sandbox", "Production"]

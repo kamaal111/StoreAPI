@@ -5,9 +5,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..typing import Env
-    from typing import Optional
-
-_internal_private_key: "Optional[str]" = None
 
 
 class JWTHelper:
@@ -36,17 +33,16 @@ class JWTHelper:
         return jwt_payload
 
     def decode_token(self, *, payload: str):
-        private_key = JWTHelper._get_private_key()
-        return jwt.decode(jwt=payload, key=private_key, algorithms=[self.ALGORITHM])
+        public_key = JWTHelper._get_public_key()
+
+        return jwt.decode(jwt=payload, key=public_key, algorithms=[self.ALGORITHM])
 
     @staticmethod
     def _get_private_key():
-        global _internal_private_key
-        if _internal_private_key:
-            private_key = _internal_private_key
-        else:
-            with open("store_key.p8", "r") as store_key:
-                _internal_private_key = store_key.read()
-                private_key = _internal_private_key
+        with open("store_key.p8", "r") as private_key:
+            return private_key.read()
 
-        return private_key
+    @staticmethod
+    def _get_public_key():
+        with open("store_key_public.pem", "r") as public_key:
+            return public_key.read()
