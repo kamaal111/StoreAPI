@@ -20,14 +20,11 @@ def read_root():
 def read_transactions(transactions_id: str):
     env = get_env()
     store_kit = StoreKit(env=env)
-    result = store_kit.get_transaction_history(
-        original_transaction_id=transactions_id, preview=True
-    )
+    result = store_kit.get_transaction_history(original_transaction_id=transactions_id)
     match result:
         case Failure(error):
             print("failure", error)
             raise HTTPException(status_code=500, detail="noooo!")
         case Success(data):
             _ = data.pop("signedTransactions", None)
-            # print(f"{signed_transactions}")
-            return {"status": data}
+            return data
