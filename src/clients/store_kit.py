@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from typing import List
     from returns.result import Result
 
-    from ..typing import Env, TransactionHistory, JWSTransaction
+    from ..typing import Env, TransactionHistory, TransactionHistoryResponse, JWSTransaction
 
 
 _BASE_URL = "https://api.storekit-sandbox.itunes.apple.com/"
@@ -67,19 +67,46 @@ class StoreKit:
 
         decoded_signed_transactions: "List[JWSTransaction]" = []
         for signed_transaction in json_response["signedTransactions"]:
-            decoded_signed_transaction = self.jwt_helper.decode_jws(
-                payload=signed_transaction
-            )
-            decoded_signed_transactions.append(decoded_signed_transaction)
+            parsed_decoded_signed_transaction = self._map_signed_transaction_to_transaction(signed_transaction=signed_transaction)
+            decoded_signed_transactions.append(parsed_decoded_signed_transaction)
 
-        json_response["transactions"] = decoded_signed_transactions
+        parsed_response = self._parse_transaction_history_response(response=json_response, transactions=decoded_signed_transactions)
+        return Success(parsed_response)
 
-        return Success(json_response)
+    def _parse_transaction_history_response(self, *, response: "TransactionHistoryResponse", transactions: "List[JWSTransaction]"):
+        parsed_response: "TransactionHistory" = {
+            "revision": response["revision"],
+            "bundle_id": response["bundleId"],
+            "environment": response["environment"],
+            "has_more": response["hasMore"],
+            "transactions": transactions
+        }
+        return parsed_response
+
+    def _map_signed_transaction_to_transaction(self, *, signed_transaction: str):
+        decoded_signed_transaction = self.jwt_helper.decode_jws(payload=signed_transaction)
+        parsed_decoded_signed_transaction: "JWSTransaction" = {
+            "transaction_id": decoded_signed_transaction["transactionId"],
+            "original_transaction_id": decoded_signed_transaction["originalTransactionId"],
+            "web_order_line_item_id": decoded_signed_transaction["webOrderLineItemId"],
+            "bundle_id": decoded_signed_transaction["bundleId"],
+            "product_id": decoded_signed_transaction["productId"],
+            "subscription_group_identifier": decoded_signed_transaction["subscriptionGroupIdentifier"],
+            "purchase_date": decoded_signed_transaction["purchaseDate"],
+            "original_purchase_date": decoded_signed_transaction["originalPurchaseDate"],
+            "expires_date": decoded_signed_transaction["expiresDate"],
+            "quantity": decoded_signed_transaction["quantity"],
+            "type": decoded_signed_transaction["type"],
+            "in_app_ownership_type": decoded_signed_transaction["inAppOwnershipType"],
+            "signed_date": decoded_signed_transaction["signedDate"],
+            "environment": decoded_signed_transaction["environment"]
+        }
+        return parsed_decoded_signed_transaction
 
     @preview_result("response.json")
     def _get_transaction_history_response(
         self, *, original_transaction_id: str, preview: bool
-    ) -> "Result[TransactionHistory, requests.HTTPError]":
+    ) -> "Result[TransactionHistoryResponse, requests.HTTPError]":
         url = urljoin(_BASE_URL, f"inApps/v1/history/{original_transaction_id}")
         response = requests.get(url=url, headers=self.headers)
 
@@ -88,5 +115,5 @@ class StoreKit:
         except requests.HTTPError as error:
             return Failure(error)
 
-        json_response: "TransactionHistory" = response.json()
+        json_response: "TransactionHistoryResponse" = response.json()
         return Success(json_response)

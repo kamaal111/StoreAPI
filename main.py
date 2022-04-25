@@ -27,5 +27,4 @@ def read_transaction_history(transactions_id: str):
                 status_code=error.status_code, detail=error.message
             ) from error
         case Success(data):
-            _ = data.pop("signedTransactions", None)
             return data

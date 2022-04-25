@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
-    from ..typing import Env, JWSTransaction
+    from ..typing import Env, JWSTransactionResponse
 
 
 class JWTHelper:
@@ -34,7 +34,7 @@ class JWTHelper:
 
         return jwt_payload
 
-    def decode_jws(self, *, payload: str) -> "JWSTransaction":
+    def decode_jws(self, *, payload: str) -> "JWSTransactionResponse":
         segment = payload.split(".")[1]
         extra = (b"=" * (-len(segment) % 4)).decode()
         decoded_segment = base64.b64decode(f"{segment}{extra}")
